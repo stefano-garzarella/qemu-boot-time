@@ -63,7 +63,7 @@ qemu-system-x86_64 -machine q35,accel=kvm -bios qboot/bios.bin \
 $ kill $PERF_PID
 
 # Get the measurements
-$ perf script -s qemu-perf-script.py -i $PERF_DATA
+$ perf script -s qemu-boot-time/perf-script/qemu-perf-script.py -i $PERF_DATA
 ```
 
 
