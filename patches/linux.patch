@@ -1,0 +1,67 @@
+From 07a55b06c02c33c894cf25237ed75a471f50dead Mon Sep 17 00:00:00 2001
+From: Stefano Garzarella <sgarzare@redhat.com>
+Date: Fri, 30 Nov 2018 16:56:28 +0100
+Subject: [PATCH] boot: add debug port write to trace boot times
+
+---
+ init/benchmark.h | 17 +++++++++++++++++
+ init/main.c      |  5 +++++
+ 2 files changed, 22 insertions(+)
+ create mode 100644 init/benchmark.h
+
+diff --git a/init/benchmark.h b/init/benchmark.h
+new file mode 100644
+index 000000000000..9572943f3a9d
+--- /dev/null
++++ b/init/benchmark.h
+@@ -0,0 +1,17 @@
++#ifndef BENCHMARK_H
++#define BENCHMARK_H
++
++/* IO ports for different exit points */
++#define LINUX_EXIT_PORT 0xf4
++#define FW_EXIT_PORT    0xf5
++
++/* Exit point values */
++#define FW_START    1
++#define LINUX_START_FWCFG 2
++#define LINUX_START_BOOT  3
++#define LINUX_START_PVHBOOT  4
++#define FW_DO_BOOT 5
++#define LINUX_START_KERNEL 6
++#define LINUX_START_USER 7
++
++#endif
+diff --git a/init/main.c b/init/main.c
+index c4a45145e102..05f9cc85d07d 100644
+--- a/init/main.c
++++ b/init/main.c
+@@ -10,6 +10,7 @@
+  */
+ 
+ #define DEBUG		/* Enable initcall_debug */
++#include "benchmark.h"
+ 
+ #include <linux/types.h>
+ #include <linux/extable.h>
+@@ -515,6 +516,8 @@ asmlinkage __visible void __init start_kernel(void)
+ 	char *command_line;
+ 	char *after_dashes;
+ 
++	outb(LINUX_START_KERNEL, LINUX_EXIT_PORT);
++
+ 	set_task_stack_end_magic(&init_task);
+ 	smp_setup_processor_id();
+ 	debug_objects_early_init();
+@@ -1008,6 +1011,8 @@ static int __ref kernel_init(void *unused)
+ 
+ 	rcu_end_inkernel_boot();
+ 
++	outb(LINUX_START_USER, LINUX_EXIT_PORT);
++
+ 	if (ramdisk_execute_command) {
+ 		ret = run_init_process(ramdisk_execute_command);
+ 		if (!ret)
+-- 
+2.20.1
+
