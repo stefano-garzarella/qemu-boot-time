@@ -4,7 +4,7 @@ This repository collects perf-script and patches to measure the boot time
 of a Linux VM with QEMU. Using I/O writes, we can trace events in the firmware
 and Linux kernel.
 
-We extended the IO port addresses and values defined in qboot
+We extended the I/O port addresses and values defined in qboot
 [https://github.com/bonzini/qboot/blob/master/benchmark.h] adding new trace
 points to trace the kernel boot time.
 
@@ -48,7 +48,7 @@ mount -o remount,mode=755 /sys/kernel/debug/tracing
 # Start perf record to get the trace events
 PERF_DATA="qemu_perf.data"
 perf record -a -e kvm:kvm_entry -e kvm:kvm_pio -e sched:sched_process_exec \
--o $PERF_DATA &
+            -o $PERF_DATA &
 PERF_PID=$!
 
 # You can run QEMU multiple times to get also some statistics (Avg/Min/Max)
