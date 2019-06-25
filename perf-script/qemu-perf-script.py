@@ -30,7 +30,7 @@ class QemuTrace:
 	EXIT_POINTS = { 1 : 'fw_start',
 			2 : 'linux_start_fwcfg',
 			3 : 'linux_start_boot',
-			4 : 'linux_start_pvhboot'
+			4 : 'linux_start_pvhboot',
 			5 : 'fw_do_boot',
 			6 : 'linux_start_kernel',
 			7 : 'linux_start_user'}
