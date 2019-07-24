@@ -19,7 +19,18 @@ git checkout -b benchmark
 git am qemu-boot-time/patches/linux.patch
 ```
 #### QEMU
-TODO
+Apply the `patches/qemu.patch` to your QEMU in order to trace optionrom
+events
+```shell
+git checkout -b benchmark
+git am qemu-boot-time/patches/qemu.patch
+
+cd build-benchmark
+../configure --target-list=x86_64-softmmu ...
+make
+```
+You can use `qemu-system-x86_64 -L qemu/build-benchmark/pc-bios/optionrom/ ...`
+to use the optionrom patched.
 #### SeaBIOS
 Apply the `patches/seabios.patch` to your SeaBIOS in order to trace bios
 events
@@ -31,8 +42,8 @@ make clean distclean
 cp /path/to/qemu/roms/config.seabios-256k .config
 make oldnoconfig
 ```
-You can use `qemu-system-x86_64 -bios seabios/out/bios.bin` to use the SeaBIOS
-image built.
+You can use `qemu-system-x86_64 -bios seabios/out/bios.bin ...` to use the
+SeaBIOS image patched.
 #### qboot
 qboot already defines trace points, we just need to compile it defining
 `BENCHMARK_HACK`
@@ -40,6 +51,8 @@ qboot already defines trace points, we just need to compile it defining
 ```shell
 $ BIOS_CFLAGS="-DBENCHMARK_HACK=1" make
 ```
+You can use `qemu-system-x86_64 -bios qboot/bios.bin ...` to use the qboot
+image.
 
 
 ## Prerequisites
@@ -63,11 +76,17 @@ perf record -a -e kvm:kvm_entry -e kvm:kvm_pio -e sched:sched_process_exec \
 PERF_PID=$!
 
 # You can run QEMU multiple times to get also some statistics (Avg/Min/Max)
-qemu-system-x86_64 -machine q35,accel=kvm -bios qboot/bios.bin \
+qemu-system-x86_64 -machine q35,accel=kvm \
+                   -bios seabios/out/bios.bin \
+                   -L qemu/build-benchmark/pc-bios/optionrom/ \
                    -kernel linux/bzImage ...
-qemu-system-x86_64 -machine q35,accel=kvm -bios qboot/bios.bin \
+qemu-system-x86_64 -machine q35,accel=kvm \
+                   -bios seabios/out/bios.bin \
+                   -L qemu/build-benchmark/pc-bios/optionrom/ \
                    -kernel linux/bzImage ...
-qemu-system-x86_64 -machine q35,accel=kvm -bios qboot/bios.bin \
+qemu-system-x86_64 -machine q35,accel=kvm \
+                   -bios seabios/out/bios.bin \
+                   -L qemu/build-benchmark/pc-bios/optionrom/ \
                    -kernel linux/bzImage ...
 
 # Stop perf record
