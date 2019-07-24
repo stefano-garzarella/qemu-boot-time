@@ -1,7 +1,7 @@
 From 54b2cb3c0419afa1dc3a28b216d53fc46a6c7352 Mon Sep 17 00:00:00 2001
 From: Stefano Garzarella <stefanogarzarella@gmail.com>
 Date: Tue, 20 Nov 2018 09:51:25 +0100
-Subject: [PATCH] benchmark: add debug I/O write to trace boot times
+Subject: [PATCH] boot: add debug port writes to trace boot times
 
 ---
  src/Kconfig     |  7 +++++++

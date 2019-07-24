@@ -1,7 +1,7 @@
 From 07a55b06c02c33c894cf25237ed75a471f50dead Mon Sep 17 00:00:00 2001
 From: Stefano Garzarella <sgarzare@redhat.com>
 Date: Fri, 30 Nov 2018 16:56:28 +0100
-Subject: [PATCH] boot: add debug port write to trace boot times
+Subject: [PATCH] boot: add debug port writes to trace boot times
 
 ---
  init/benchmark.h | 17 +++++++++++++++++
