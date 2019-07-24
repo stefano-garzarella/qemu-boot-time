@@ -38,7 +38,7 @@ qboot already defines trace points, we just need to compile it defining
 `BENCHMARK_HACK`
 
 ```shell
-$ BENCHMARK_HACK=1 make
+$ BIOS_CFLAGS="-DBENCHMARK_HACK=1" make
 ```
 
 
