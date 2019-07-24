@@ -12,7 +12,7 @@ points to trace the kernel boot time.
 ## Patches
 
 #### Linux
-Apply the `patches/linux.patch` to your kernel in order to trace Linux kernel
+Apply the `patches/linux.patch` to your Linux kernel in order to trace kernel
 events
 ```shell
 git checkout -b benchmark
@@ -21,7 +21,18 @@ git am qemu-boot-time/patches/linux.patch
 #### QEMU
 TODO
 #### SeaBIOS
-TODO
+Apply the `patches/seabios.patch` to your SeaBIOS in order to trace bios
+events
+```shell
+git checkout -b benchmark
+git am qemu-boot-time/patches/seabios.patch
+
+make clean distclean
+cp /path/to/qemu/roms/config.seabios-256k .config
+make oldnoconfig
+```
+You can use `qemu-system-x86_64 -bios seabios/out/bios.bin` to use the SeaBIOS
+image built.
 #### qboot
 qboot already defines trace points, we just need to compile it defining
 `BENCHMARK_HACK`
@@ -75,6 +86,7 @@ perf script -s qemu-boot-time/perf-script/qemu-perf-script.py -i $PERF_DATA
   * `fw_start`: first entry of the firmware
   * `fw_do_boot`: after the firmware initialization (e.g. PCI setup, etc.)
   * `linux_start_boot`: before the jump to the Linux kernel
+  * `linux_start_pvhboot`: before the jump to the Linux PVH kernel
 * Linux Kernel
   * `linux_start_kernel`: first entry of the Linux kernel
   * `linux_start_user`: before starting the init process

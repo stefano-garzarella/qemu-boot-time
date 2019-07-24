@@ -1,0 +1,103 @@
+From 54b2cb3c0419afa1dc3a28b216d53fc46a6c7352 Mon Sep 17 00:00:00 2001
+From: Stefano Garzarella <stefanogarzarella@gmail.com>
+Date: Tue, 20 Nov 2018 09:51:25 +0100
+Subject: [PATCH] benchmark: add debug I/O write to trace boot times
+
+---
+ src/Kconfig     |  7 +++++++
+ src/benchmark.h | 16 ++++++++++++++++
+ src/boot.c      |  5 +++++
+ src/post.c      |  5 +++++
+ 4 files changed, 33 insertions(+)
+ create mode 100644 src/benchmark.h
+
+diff --git a/src/Kconfig b/src/Kconfig
+index 55a87cb..daf8222 100644
+--- a/src/Kconfig
++++ b/src/Kconfig
+@@ -566,6 +566,13 @@ menu "Debugging"
+             information by outputing strings in a special port present in the
+             IO space.
+ 
++    config DEBUG_BENCHMARK
++        depends on QEMU_HARDWARE
++        bool "benchmark IO port debugging"
++        default y
++        help
++            Benchmark debug
++
+     config DEBUG_COREBOOT
+         depends on COREBOOT && DEBUG_LEVEL != 0
+         bool "coreboot cbmem debug logging"
+diff --git a/src/benchmark.h b/src/benchmark.h
+new file mode 100644
+index 0000000..c785e1d
+--- /dev/null
++++ b/src/benchmark.h
+@@ -0,0 +1,17 @@
++#ifndef BENCHMARK_H
++#define BENCHMARK_H
++
++/* IO ports for different exit points */
++#define LINUX_EXIT_PORT 0xf4
++#define FW_EXIT_PORT    0xf5
++
++/* Exit point values */
++#define FW_START    1
++#define LINUX_START_FWCFG 2
++#define LINUX_START_BOOT  3
++#define LINUX_START_PVHBOOT  4
++#define FW_DO_BOOT 5
++#define LINUX_START_KERNEL 6
++#define LINUX_START_USER 7
++
++#endif
+diff --git a/src/boot.c b/src/boot.c
+index 9f82f3c..c6d8cc1 100644
+--- a/src/boot.c
++++ b/src/boot.c
+@@ -21,6 +21,7 @@
+ #include "string.h" // memset
+ #include "util.h" // irqtimer_calc
+ #include "tcgbios.h" // tpm_*
++#include "benchmark.h"
+ 
+ 
+ /****************************************************************
+@@ -739,6 +740,10 @@ do_boot(int seq_nr)
+     if (seq_nr >= BEVCount)
+         boot_fail();
+ 
++#if CONFIG_DEBUG_BENCHMARK
++    outb(FW_DO_BOOT, FW_EXIT_PORT);
++#endif
++
+     // Boot the given BEV type.
+     struct bev_s *ie = &BEV[seq_nr];
+     switch (ie->type) {
+diff --git a/src/post.c b/src/post.c
+index f93106a..7636d41 100644
+--- a/src/post.c
++++ b/src/post.c
+@@ -23,6 +23,7 @@
+ #include "string.h" // memset
+ #include "util.h" // kbd_init
+ #include "tcgbios.h" // tpm_*
++#include "benchmark.h"
+ 
+ 
+ /****************************************************************
+@@ -323,6 +324,10 @@ handle_post(void)
+     if (!CONFIG_QEMU && !CONFIG_COREBOOT)
+         return;
+ 
++#if CONFIG_DEBUG_BENCHMARK
++    outb(FW_START, FW_EXIT_PORT);
++#endif
++
+     serial_debug_preinit();
+     debug_banner();
+ 
+-- 
+2.20.1
+
