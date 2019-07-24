@@ -99,6 +99,9 @@ perf script -s qemu-boot-time/perf-script/qemu-perf-script.py -i $PERF_DATA
 
 
 ## Trace points
+
+The `benchmark.h` file contains the following trace points used in the
+`patches`:
 * QEMU
   * `qemu_init_end`: first kvm_entry (i.e. QEMU initialized has finished)
 * Firmware (SeaBIOS + optionrom or qboot)
@@ -112,6 +115,25 @@ perf script -s qemu-boot-time/perf-script/qemu-perf-script.py -i $PERF_DATA
 
 Trace points are printed only if they are recorded, so you can only enable
 few of them.
+
+### Custom trace points
+If you want to add new trace points, you can simply add an I/O write to
+`LINUX_EXIT_PORT` or `FW_EXIT_PORT` with a value (> 7) that identifies the
+trace point:
+```c
+    outb(10, LINUX_EXIT_PORT);
+```
+The `perf script` output will contain `Exit point 10` line that identifies your
+trace point:
+
+```shell
+ qemu_init_end: 143.770419
+ fw_start: 143.964328 (+0.193909)
+ fw_do_boot: 164.71107 (+20.746742)
+ Exit point 10: 165.396804 (+0.685734)
+ linux_start_kernel: 165.979486 (+0.582682)
+ linux_start_user: 272.178335 (+106.198849)
+```
 
 
 ## Example of output
