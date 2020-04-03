@@ -78,11 +78,14 @@ mount -o remount,mode=755 /sys/kernel/debug/tracing
 ## How to use
 
 ```shell
-# Start perf record to get the trace events
+# Start perf record to collect the trace events
 PERF_DATA="qemu_perf.data"
 perf record -a -e kvm:kvm_entry -e kvm:kvm_pio -e sched:sched_process_exec \
             -o $PERF_DATA &
 PERF_PID=$!
+
+# Wait some seconds to have perf record ready
+sleep 3
 
 # You can run QEMU multiple times to get also some statistics (Avg/Min/Max)
 qemu-system-x86_64 -machine q35,accel=kvm \
@@ -103,7 +106,6 @@ kill $PERF_PID
 
 # Get the measurements
 perf script -s qemu-boot-time/perf-script/qemu-perf-script.py -i $PERF_DATA
-
 ```
 
 ## Trace points
