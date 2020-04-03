@@ -8,19 +8,23 @@ We extended the I/O port addresses and values defined in qboot
 [https://github.com/bonzini/qboot/blob/master/benchmark.h] adding new trace
 points to trace the kernel boot time.
 
-
 ## Patches
 
-#### Linux
+### Linux
+
 Apply the `patches/linux.patch` to your Linux kernel in order to trace kernel
 events
+
 ```shell
 git checkout -b benchmark
 git am qemu-boot-time/patches/linux.patch
 ```
-#### QEMU
+
+### QEMU
+
 Apply the `patches/qemu.patch` to your QEMU in order to trace optionrom
 events
+
 ```shell
 git checkout -b benchmark
 git am qemu-boot-time/patches/qemu.patch
@@ -29,11 +33,14 @@ cd build-benchmark
 ../configure --target-list=x86_64-softmmu ...
 make
 ```
+
 You can use `qemu-system-x86_64 -L qemu/build-benchmark/pc-bios/optionrom/ ...`
 to use the optionrom patched.
-#### SeaBIOS
+
+### SeaBIOS
 Apply the `patches/seabios.patch` to your SeaBIOS in order to trace bios
 events
+
 ```shell
 git checkout -b benchmark
 git am qemu-boot-time/patches/seabios.patch
@@ -42,20 +49,23 @@ make clean distclean
 cp /path/to/qemu/roms/config.seabios-256k .config
 make oldnoconfig
 ```
+
 You can use `qemu-system-x86_64 -bios seabios/out/bios.bin ...` to use the
 SeaBIOS image patched.
-#### qboot
+
+### qboot
 qboot already defines trace points, we just need to compile it defining
 `BENCHMARK_HACK`
 
 ```shell
 BIOS_CFLAGS="-DBENCHMARK_HACK=1" make
 ```
+
 You can use `qemu-system-x86_64 -bios qboot/bios.bin ...` to use the qboot
 image.
 
-
 ## Prerequisites
+
 The following steps allow `perf record` to get the kvm trace events:
 
 ```shell
@@ -64,7 +74,6 @@ echo -1 > /proc/sys/kernel/perf_event_paranoid
 mount -o remount,mode=755 /sys/kernel/debug
 mount -o remount,mode=755 /sys/kernel/debug/tracing
 ```
-
 
 ## How to use
 
@@ -97,11 +106,11 @@ perf script -s qemu-boot-time/perf-script/qemu-perf-script.py -i $PERF_DATA
 
 ```
 
-
 ## Trace points
 
 The `benchmark.h` file contains the following trace points used in the
 `patches`:
+
 * QEMU
   * `qemu_init_end`: first kvm_entry (i.e. QEMU initialized has finished)
 * Firmware (SeaBIOS + optionrom or qboot)
@@ -117,12 +126,15 @@ Trace points are printed only if they are recorded, so you can only enable
 few of them.
 
 ### Custom trace points
+
 If you want to add new trace points, you can simply add an I/O write to
 `LINUX_EXIT_PORT` or `FW_EXIT_PORT` with a value (> 7) that identifies the
 trace point:
+
 ```c
     outb(10, LINUX_EXIT_PORT);
 ```
+
 The `perf script` output will contain `Exit point 10` line that identifies your
 trace point:
 
@@ -135,14 +147,14 @@ trace point:
  linux_start_user: 272.178335 (+106.198849)
 ```
 
-
 ## Example of output
+
 ```shell
 $ perf script -s qemu-boot-time/perf-script/qemu-perf-script.py -i $PERF_DATA
 
 in trace_begin
-sched__sched_process_exec     1 55061.435418353   289738 qemu-system-x86      
-kvm__kvm_entry           1 55061.466887708   289741 qemu-system-x86      
+sched__sched_process_exec     1 55061.435418353   289738 qemu-system-x86
+kvm__kvm_entry           1 55061.466887708   289741 qemu-system-x86
 kvm__kvm_pio             1 55061.467070650   289741 qemu-system-x86      rw=1, port=0xf5, size=1, count=1, val=1
 
 kvm__kvm_pio             1 55061.475818073   289741 qemu-system-x86      rw=1, port=0xf5, size=1, count=1, val=4
@@ -153,8 +165,8 @@ kvm__kvm_pio             1 55061.558779540   289741 qemu-system-x86      rw=1, p
 
 kvm__kvm_pio             1 55061.686849663   289741 qemu-system-x86      rw=1, port=0xf4, size=1, count=1, val=6
 
-sched__sched_process_exec     4 55067.461869075   289793 qemu-system-x86      
-kvm__kvm_entry           4 55067.496402472   289796 qemu-system-x86      
+sched__sched_process_exec     4 55067.461869075   289793 qemu-system-x86
+kvm__kvm_entry           4 55067.496402472   289796 qemu-system-x86
 kvm__kvm_pio             4 55067.496555385   289796 qemu-system-x86      rw=1, port=0xf5, size=1, count=1, val=1
 
 kvm__kvm_pio             4 55067.505067184   289796 qemu-system-x86      rw=1, port=0xf5, size=1, count=1, val=4
@@ -165,8 +177,8 @@ kvm__kvm_pio             4 55067.584029910   289796 qemu-system-x86      rw=1, p
 
 kvm__kvm_pio             4 55067.704751791   289796 qemu-system-x86      rw=1, port=0xf4, size=1, count=1, val=6
 
-sched__sched_process_exec     0 55070.073823767   289827 qemu-system-x86      
-kvm__kvm_entry           0 55070.110507211   289830 qemu-system-x86      
+sched__sched_process_exec     0 55070.073823767   289827 qemu-system-x86
+kvm__kvm_entry           0 55070.110507211   289830 qemu-system-x86
 kvm__kvm_pio             0 55070.110694645   289830 qemu-system-x86      rw=1, port=0xf5, size=1, count=1, val=1
 
 kvm__kvm_pio             1 55070.120092692   289830 qemu-system-x86      rw=1, port=0xf5, size=1, count=1, val=4
